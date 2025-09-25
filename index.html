@@ -106,18 +106,32 @@
       // Display JSON locally for debugging
       document.getElementById('output').textContent = JSON.stringify(projectData, null, 2);
 
-const text = await res.text();
+      try {
+        // ⚠️ Fetch call is properly assigned to 'res'
+        const res = await fetch("/.netlify/functions/triggerWorkflow", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(projectData)
+        });
 
-try {
-  const result = JSON.parse(text);
-  if (result.success) {
-    alert("Project submitted!");
-  } else {
-    alert("Error: " + (result.error || text));
-  }
-} catch {
-  alert("Error: " + text); // fallback if response isn't JSON
-}
+        // Try to parse JSON response
+        let result;
+        try {
+          result = await res.json();
+        } catch {
+          result = { success: false, error: res.statusText };
+        }
+
+        // Popup alert
+        if (res.ok && result.success) {
+          alert("Project submitted!");
+        } else {
+          alert("Error submitting project: " + (result.error || res.statusText));
+        }
+
+      } catch (err) {
+        alert("Error submitting project: " + err.message);
+      }
     });
   </script>
 </body>
