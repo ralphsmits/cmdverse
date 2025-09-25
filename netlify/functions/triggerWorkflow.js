@@ -1,13 +1,20 @@
+import fetch from "node-fetch";
+
 export async function handler(event, context) {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Only POST allowed" };
   }
 
-  const projectData = JSON.parse(event.body);
+  let projectData;
+  try {
+    projectData = JSON.parse(event.body);
+  } catch (err) {
+    return { statusCode: 400, body: "Invalid JSON in request body" };
+  }
 
   const repoOwner = "ralphsmits";
   const repoName = "cmdverse";
-  const workflowId = "update-projects.yml";
+  const workflowId = "update-projects.yml"; // just the filename
   const token = process.env.TOKEN_GITHUB;
 
   try {
@@ -17,22 +24,22 @@ export async function handler(event, context) {
         method: "POST",
         headers: {
           "Authorization": `token ${token}`,
-          "Accept": "application/vnd.github.v3+json",
+          "Accept": "application/vnd.github.v3+json"
         },
         body: JSON.stringify({
-          ref: "main",
-          inputs: { projectJson: JSON.stringify(projectData) },
-        }),
+          ref: "main", // branch to run workflow on
+          inputs: { projectJson: JSON.stringify(projectData) }
+        })
       }
     );
 
     if (!response.ok) {
       const errorText = await response.text();
-      return { statusCode: response.status, body: JSON.stringify({ success: false, error: errorText }) };
+      return { statusCode: response.status, body: `GitHub API error: ${errorText}` };
     }
 
     return { statusCode: 200, body: JSON.stringify({ success: true }) };
   } catch (err) {
-    return { statusCode: 500, body: JSON.stringify({ success: false, error: err.message }) };
+    return { statusCode: 500, body: `Server error: ${err.message}` };
   }
 }
