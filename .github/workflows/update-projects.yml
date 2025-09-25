@@ -11,25 +11,25 @@ jobs:
   update-json:
     runs-on: ubuntu-latest
     steps:
+      # 1. Checkout repository
       - uses: actions/checkout@v3
 
+      # 2. Ensure projects.json exists and is valid
       - name: Ensure projects.json exists
         run: |
-          if [ ! -f projects.json ]; then
+          if [ ! -f projects.json ] || [ ! -s projects.json ]; then
             echo "[]" > projects.json
           fi
 
-      - name: Append new project from input
+      # 3. Append new project from workflow input
+      - name: Append new project
         run: |
-          # Parse input and append directly
           echo "${{ github.event.inputs.projectJson }}" | jq -s '.[1] as $new | .[0] + [$new]' projects.json - > projects_updated.json
           mv projects_updated.json projects.json
-
-      - name: Debug
-        run: |
-          echo "projects.json after append:"
+          echo "Updated projects.json:"
           cat projects.json
 
+      # 4. Commit and push changes
       - name: Commit & push
         run: |
           git config user.name "github-actions[bot]"
