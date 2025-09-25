@@ -107,14 +107,13 @@
       document.getElementById('output').textContent = JSON.stringify(projectData, null, 2);
 
       try {
-        // ⚠️ Fetch call is properly assigned to 'res'
+        // Properly declare 'res'
         const res = await fetch("/.netlify/functions/triggerWorkflow", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(projectData)
         });
 
-        // Try to parse JSON response
         let result;
         try {
           result = await res.json();
@@ -122,13 +121,12 @@
           result = { success: false, error: res.statusText };
         }
 
-        // Popup alert
+        // Always show popup
         if (res.ok && result.success) {
           alert("Project submitted!");
         } else {
           alert("Error submitting project: " + (result.error || res.statusText));
         }
-
       } catch (err) {
         alert("Error submitting project: " + err.message);
       }
