@@ -1,0 +1,32 @@
+name: Update Projects JSON
+
+on:
+  workflow_dispatch:
+    inputs:
+      projectJson:
+        description: 'JSON string of new project'
+        required: true
+
+jobs:
+  update-json:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Parse input and append project
+        id: append
+        run: |
+          echo "${{ github.event.inputs.projectJson }}" > new_project.json
+          jq -s '.[0] + [.[1]]' projects.json new_project.json > projects_updated.json
+          mv projects_updated.json projects.json
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add projects.json
+          git commit -m "Add new project via workflow"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
