@@ -46,38 +46,41 @@
   <div id="output"></div>
 
   <script>
-    document.getElementById('projectForm').addEventListener('submit', async function(event) {
-      event.preventDefault();
+document.getElementById('projectForm').addEventListener('submit', async function(event) {
+  event.preventDefault();
 
-      const projectData = {
-        projectName: document.getElementById('projectName').value.trim(),
-        creators: document.getElementById('creators').value.split(',').map(s => s.trim()).filter(s => s),
-        description: document.getElementById('description').value.trim(),
-        category: document.getElementById('category').value,
-        year: document.getElementById('year').value,
-        studielast: document.getElementById('studielast').value.trim()
-      };
+  const projectData = {
+    projectName: document.getElementById('projectName').value.trim(),
+    creators: document.getElementById('creators').value.split(',').map(s => s.trim()).filter(s => s),
+    description: document.getElementById('description').value.trim(),
+    category: document.getElementById('category').value,
+    year: parseInt(document.getElementById('year').value),
+    studielast: document.getElementById('studielast').value.trim()
+  };
 
-      document.getElementById('output').textContent = JSON.stringify(projectData, null, 2);
+  // Show what's being sent
+  document.getElementById('output').textContent = 'Sending: ' + JSON.stringify(projectData, null, 2);
 
-      try {
-        const res = await fetch("/.netlify/functions/triggerWorkflow", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(projectData)
-        });
-
-        const text = await res.text();
-        try {
-          const result = JSON.parse(text);
-          alert(result.success ? "Project submitted!" : "Error: " + (result.error || text));
-        } catch {
-          alert("Error: " + text);
-        }
-      } catch (err) {
-        alert("Error submitting project: " + err.message);
-      }
+  try {
+    const response = await fetch("/.netlify/functions/triggerWorkflow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(projectData)
     });
+
+    const result = await response.json();
+    document.getElementById('output').textContent = 'Response: ' + JSON.stringify(result, null, 2);
+    
+    if (response.ok && result.success) {
+      alert("✅ Project submitted successfully! Check GitHub Actions for progress.");
+    } else {
+      alert("❌ Error: " + (result.error || 'Unknown error'));
+    }
+  } catch (err) {
+    document.getElementById('output').textContent = 'Error: ' + err.message;
+    alert("❌ Network error: " + err.message);
+  }
+});
   </script>
 </body>
 </html>
