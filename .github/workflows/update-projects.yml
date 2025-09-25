@@ -11,52 +11,46 @@ jobs:
   update-json:
     runs-on: ubuntu-latest
     steps:
-      # 1. Checkout the repo
       - uses: actions/checkout@v3
         with:
           token: ${{ secrets.TOKEN_GITHUB }}
 
-      # 2. Ensure projects.json exists and is valid
-      - name: Ensure projects.json exists
-        run: |
-          if [ ! -f projects.json ]; then
-            echo '[]' > projects.json
-          fi
-          # Validate JSON structure
-          if ! jq empty projects.json 2>/dev/null; then
-            echo '[]' > projects.json
-          fi
+      - name: Setup Python for JSON processing
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
 
-      # 3. Debug: Show what we're receiving
-      - name: Debug input
+      - name: Update projects.json
         run: |
-          echo "Raw input: ${{ github.event.inputs.projectJson }}"
-          echo "${{ github.event.inputs.projectJson }}" > new_project.json
-          echo "Parsed new project:"
-          cat new_project.json
-
-      # 4. Append new project (FIXED)
-      - name: Append new project
-        run: |
-          # Read existing projects and append new one
-          jq --argjson newProject "$(cat new_project.json)" '. + [$newProject]' projects.json > projects_updated.json
+          python -c "
+          import json
+          import sys
           
-          # Validate the result
-          if jq empty projects_updated.json 2>/dev/null; then
-            mv projects_updated.json projects.json
-            echo "Successfully updated projects.json"
-            echo "New content:"
-            cat projects.json
-          else
-            echo "Error: Resulting JSON is invalid"
-            exit 1
-          fi
+          # Read existing projects
+          try:
+              with open('projects.json', 'r') as f:
+                  projects = json.load(f)
+          except:
+              projects = []
+          
+          # Parse new project
+          new_project = json.loads('${{ github.event.inputs.projectJson }}'.replace('\\n', ' '))
+          
+          # Append new project
+          projects.append(new_project)
+          
+          # Write back
+          with open('projects.json', 'w') as f:
+              json.dump(projects, f, indent=2)
+          
+          print(f'Added project: {new_project.get(\\\"projectName\\\", \\\"unknown\\\")}')
+          print(f'Total projects: {len(projects)}')
+          "
 
-      # 5. Commit & push changes
-      - name: Commit & push
+      - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add projects.json
-          git diff --cached --quiet || git commit -m "Add new project via workflow"
+          git diff --cached --quiet || git commit -m "Add new project: ${{ github.event.inputs.projectJson.projectName || 'Unknown' }}"
           git push
