@@ -14,19 +14,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Parse input and append project
-        id: append
+      - name: Ensure projects.json exists
+        run: |
+          if [ ! -f projects.json ]; then
+            echo "[]" > projects.json
+          fi
+
+      - name: Append new project
         run: |
           echo "${{ github.event.inputs.projectJson }}" > new_project.json
-          jq -s '.[0] + [.[1]]' projects.json new_project.json > projects_updated.json
+          jq '. + [input]' projects.json new_project.json > projects_updated.json
           mv projects_updated.json projects.json
+        shell: bash
 
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add projects.json
-          git commit -m "Add new project via workflow"
+          git commit -m "Add new project via workflow" || echo "No changes to commit"
           git push
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
