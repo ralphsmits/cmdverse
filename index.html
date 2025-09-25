@@ -85,8 +85,8 @@
     <label for="studielast">Studielast</label>
     <input type="text" id="studielast">
 
-    <label for="imageFile">Thumbnail</label>
-    <input type="file" id="imageFile" accept="image/*">
+    <label for="imageFile">Thumbnail Filename</label>
+    <input type="text" id="imageFile" placeholder="Optional">
 
     <button type="submit">Upload Project</button>
   </form>
@@ -97,19 +97,6 @@
     document.getElementById('projectForm').addEventListener('submit', async function(event) {
       event.preventDefault();
 
-      const fileInput = document.getElementById('imageFile');
-      const file = fileInput.files[0];
-
-      let base64Image = "";
-      if (file) {
-        base64Image = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-      }
-
       const projectData = {
         projectName: document.getElementById('projectName').value.trim(),
         creators: document.getElementById('creators').value.split(',').map(s => s.trim()).filter(s => s),
@@ -117,8 +104,7 @@
         category: document.getElementById('category').value,
         year: document.getElementById('year').value,
         studielast: document.getElementById('studielast').value.trim(),
-        imageFile: file ? file.name : "",
-        imageData: base64Image
+        imageFile: document.getElementById('imageFile').value.trim()
       };
 
       // Display JSON locally for debugging
