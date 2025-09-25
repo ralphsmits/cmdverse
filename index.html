@@ -85,9 +85,6 @@
     <label for="studielast">Studielast</label>
     <input type="text" id="studielast">
 
-    <label for="imageFile">Thumbnail Filename</label>
-    <input type="text" id="imageFile" placeholder="Optional">
-
     <button type="submit">Upload Project</button>
   </form>
 
@@ -103,8 +100,7 @@
         description: document.getElementById('description').value.trim(),
         category: document.getElementById('category').value,
         year: document.getElementById('year').value,
-        studielast: document.getElementById('studielast').value.trim(),
-        imageFile: document.getElementById('imageFile').value.trim()
+        studielast: document.getElementById('studielast').value.trim()
       };
 
       // Display JSON locally for debugging
