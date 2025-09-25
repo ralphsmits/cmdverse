@@ -10,7 +10,7 @@ export async function handler(event, context) {
   const repoOwner = "ralphsmits";
   const repoName = "cmdverse";
   const workflowId = "update-projects.yml"; // workflow file name in your repo
-  const token = process.env.token_github; // your GitHub PAT stored in Netlify secrets
+  const token = process.env.TOKEN_GITHUB; // your GitHub PAT stored in Netlify secrets
 
   try {
     const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/actions/workflows/${workflowId}/dispatches`, {
