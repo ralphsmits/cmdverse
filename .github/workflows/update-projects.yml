@@ -11,8 +11,7 @@ jobs:
   update-json:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Ensure projects.json exists
         run: |
@@ -20,14 +19,18 @@ jobs:
             echo "[]" > projects.json
           fi
 
-      - name: Append new project
+      - name: Append new project from input
         run: |
-          echo "${{ github.event.inputs.projectJson }}" > new_project.json
-          jq '. + [input]' projects.json new_project.json > projects_updated.json
+          # Parse input and append directly
+          echo "${{ github.event.inputs.projectJson }}" | jq -s '.[1] as $new | .[0] + [$new]' projects.json - > projects_updated.json
           mv projects_updated.json projects.json
-        shell: bash
 
-      - name: Commit and push
+      - name: Debug
+        run: |
+          echo "projects.json after append:"
+          cat projects.json
+
+      - name: Commit & push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
