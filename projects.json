@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "projectName": "Immersive Story Lamp",
+    "creators": ["Alice", "Bob"],
+    "description": "A lamp that tells stories.",
+    "category": "interactive",
+    "year": "2025",
+    "studielast": "10"
+  }
+]
