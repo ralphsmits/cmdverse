@@ -13,31 +13,50 @@ jobs:
     steps:
       # 1. Checkout the repo
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.TOKEN_GITHUB }}
 
       # 2. Ensure projects.json exists and is valid
       - name: Ensure projects.json exists
         run: |
-          if [ ! -f projects.json ] || [ ! -s projects.json ]; then
-            echo "[]" > projects.json
+          if [ ! -f projects.json ]; then
+            echo '[]' > projects.json
+          fi
+          # Validate JSON structure
+          if ! jq empty projects.json 2>/dev/null; then
+            echo '[]' > projects.json
           fi
 
-      # 3. Append new project
+      # 3. Debug: Show what we're receiving
+      - name: Debug input
+        run: |
+          echo "Raw input: ${{ github.event.inputs.projectJson }}"
+          echo "${{ github.event.inputs.projectJson }}" > new_project.json
+          echo "Parsed new project:"
+          cat new_project.json
+
+      # 4. Append new project (FIXED)
       - name: Append new project
         run: |
-          echo "Received input: ${{ github.event.inputs.projectJson }}"
-          # Use jq to append the new project to the array
-          echo "${{ github.event.inputs.projectJson }}" | jq -s '.[1] as $new | .[0] + [$new]' projects.json - > projects_updated.json
-          mv projects_updated.json projects.json
-          echo "Updated projects.json:"
-          cat projects.json
+          # Read existing projects and append new one
+          jq --argjson newProject "$(cat new_project.json)" '. + [$newProject]' projects.json > projects_updated.json
+          
+          # Validate the result
+          if jq empty projects_updated.json 2>/dev/null; then
+            mv projects_updated.json projects.json
+            echo "Successfully updated projects.json"
+            echo "New content:"
+            cat projects.json
+          else
+            echo "Error: Resulting JSON is invalid"
+            exit 1
+          fi
 
-      # 4. Commit & push changes
+      # 5. Commit & push changes
       - name: Commit & push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add projects.json
-          git commit -m "Add new project via workflow" || echo "No changes to commit"
+          git diff --cached --quiet || git commit -m "Add new project via workflow"
           git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
