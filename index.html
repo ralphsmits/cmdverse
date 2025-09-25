@@ -2,24 +2,100 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Submit Project</title>
+  <title>Project Input Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      padding: 2rem;
+    }
+    h1 {
+      text-align: center;
+    }
+    form {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 0.6rem;
+      margin-top: 0.3rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      margin-top: 1.5rem;
+      padding: 0.8rem 1.5rem;
+      background: #0077cc;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #005fa3;
+    }
+    #output {
+      margin-top: 2rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      white-space: pre-wrap;
+      background: #272822;
+      color: #f8f8f2;
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 14px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Submit a Project</h1>
+  <h1>Project Input Form</h1>
   <form id="projectForm">
-    <input id="projectName" placeholder="Project Name" required /><br/>
-    <input id="creators" placeholder="Creators (comma separated)" required /><br/>
-    <input id="description" placeholder="Description" required /><br/>
-    <input id="tags" placeholder="Tags (comma separated)" /><br/>
-    <input id="category" placeholder="Category" /><br/>
-    <input id="year" placeholder="Year" /><br/>
-    <input type="file" id="imageFile" /><br/>
-    <button type="submit">Submit</button>
+    <label for="projectName">Project Name</label>
+    <input type="text" id="projectName" required>
+
+    <label for="creators">Creators (comma-separated)</label>
+    <input type="text" id="creators" placeholder="For Example: Bob">
+
+    <label for="description">Description</label>
+    <textarea id="description" rows="3"></textarea>
+
+    <label for="category">Design Principle</label>
+    <select id="category">
+      <option value="interactive">Void</option>
+      <option value="art">Human</option>
+      <option value="tech">Tech</option>
+      <option value="other">Story</option>
+    </select>
+
+    <label for="year">Year</label>
+    <input type="number" id="year" min="1900" max="2100" value="2025">
+
+    <label for="studielast">Studielast</label>
+    <input type="text" id="studielast">
+
+    <label for="imageFile">Thumbnail</label>
+    <input type="file" id="imageFile" accept="image/*">
+
+    <button type="submit">Upload Project</button>
   </form>
 
+  <div id="output"></div>
+
   <script>
-    document.getElementById('projectForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
+    document.getElementById('projectForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
 
       const fileInput = document.getElementById('imageFile');
       const file = fileInput.files[0];
@@ -35,24 +111,31 @@
       }
 
       const projectData = {
-        projectName: document.getElementById('projectName').value,
-        creators: document.getElementById('creators').value.split(",").map(s => s.trim()),
-        description: document.getElementById('description').value,
-        tags: document.getElementById('tags').value.split(",").map(s => s.trim()),
+        projectName: document.getElementById('projectName').value.trim(),
+        creators: document.getElementById('creators').value.split(',').map(s => s.trim()).filter(s => s),
+        description: document.getElementById('description').value.trim(),
         category: document.getElementById('category').value,
         year: document.getElementById('year').value,
+        studielast: document.getElementById('studielast').value.trim(),
         imageFile: file ? file.name : "",
         imageData: base64Image
       };
 
-      const res = await fetch("/.netlify/functions/triggerWorkflow", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(projectData)
-      });
+      // Display JSON locally for debugging
+      document.getElementById('output').textContent = JSON.stringify(projectData, null, 2);
 
-      const result = await res.json();
-      alert(result.success ? "Project submitted!" : "Error submitting project");
+      try {
+        const res = await fetch("/.netlify/functions/triggerWorkflow", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(projectData)
+        });
+
+        const result = await res.json();
+        alert(result.success ? "Project submitted!" : "Error submitting project");
+      } catch (err) {
+        alert("Error submitting project: " + err.message);
+      }
     });
   </script>
 </body>
