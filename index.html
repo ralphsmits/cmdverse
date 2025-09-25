@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Submit Project</title>
+</head>
+<body>
+  <h1>Submit a Project</h1>
+  <form id="projectForm">
+    <input id="projectName" placeholder="Project Name" required /><br/>
+    <input id="creators" placeholder="Creators (comma separated)" required /><br/>
+    <input id="description" placeholder="Description" required /><br/>
+    <input id="tags" placeholder="Tags (comma separated)" /><br/>
+    <input id="category" placeholder="Category" /><br/>
+    <input id="year" placeholder="Year" /><br/>
+    <input type="file" id="imageFile" /><br/>
+    <button type="submit">Submit</button>
+  </form>
+
+  <script>
+    document.getElementById('projectForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const fileInput = document.getElementById('imageFile');
+      const file = fileInput.files[0];
+
+      let base64Image = "";
+      if (file) {
+        base64Image = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+
+      const projectData = {
+        projectName: document.getElementById('projectName').value,
+        creators: document.getElementById('creators').value.split(",").map(s => s.trim()),
+        description: document.getElementById('description').value,
+        tags: document.getElementById('tags').value.split(",").map(s => s.trim()),
+        category: document.getElementById('category').value,
+        year: document.getElementById('year').value,
+        imageFile: file ? file.name : "",
+        imageData: base64Image
+      };
+
+      const res = await fetch("/.netlify/functions/triggerWorkflow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(projectData)
+      });
+
+      const result = await res.json();
+      alert(result.success ? "Project submitted!" : "Error submitting project");
+    });
+  </script>
+</body>
+</html>
