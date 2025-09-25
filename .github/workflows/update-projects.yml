@@ -6,51 +6,99 @@ on:
       projectJson:
         description: 'JSON string of new project'
         required: true
+        type: string
 
 jobs:
   update-json:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.TOKEN_GITHUB }}
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.TOKEN_GITHUB }}
+        fetch-depth: 0
 
-      - name: Setup Python for JSON processing
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
+    - name: Debug received input
+      run: |
+        echo "Raw input received:"
+        echo "${{ github.event.inputs.projectJson }}"
+        
+        # Save input to file for debugging
+        echo '${{ github.event.inputs.projectJson }}' > input.json
+        echo "Input saved to input.json:"
+        cat input.json
+        
+        # Validate JSON
+        if python -c "import json; json.load(open('input.json')); print('JSON is valid')"; then
+          echo "✅ JSON validation passed"
+        else
+          echo "❌ JSON validation failed"
+          exit 1
+        fi
 
-      - name: Update projects.json
-        run: |
-          python -c "
-          import json
-          import sys
-          
-          # Read existing projects
-          try:
-              with open('projects.json', 'r') as f:
-                  projects = json.load(f)
-          except:
-              projects = []
-          
-          # Parse new project
-          new_project = json.loads('${{ github.event.inputs.projectJson }}'.replace('\\n', ' '))
-          
-          # Append new project
-          projects.append(new_project)
-          
-          # Write back
-          with open('projects.json', 'w') as f:
-              json.dump(projects, f, indent=2)
-          
-          print(f'Added project: {new_project.get(\\\"projectName\\\", \\\"unknown\\\")}')
-          print(f'Total projects: {len(projects)}')
-          "
+    - name: Create or update projects.json
+      run: |
+        # Create Python script to handle JSON merging
+        cat > update_projects.py << 'EOF'
+        import json
+        import os
+        import sys
+        
+        print("=== Starting projects.json update ===")
+        
+        # Read the new project data
+        with open('input.json', 'r') as f:
+            new_project = json.load(f)
+        
+        print(f"New project data: {json.dumps(new_project, indent=2)}")
+        
+        # Read existing projects or create empty array
+        if os.path.exists('projects.json'):
+            with open('projects.json', 'r') as f:
+                try:
+                    projects = json.load(f)
+                    print(f"Found existing projects.json with {len(projects)} projects")
+                except json.JSONDecodeError:
+                    print("projects.json is invalid, starting fresh")
+                    projects = []
+        else:
+            print("projects.json not found, creating new file")
+            projects = []
+        
+        # Add new project
+        projects.append(new_project)
+        print(f"Added project. Total projects now: {len(projects)}")
+        
+        # Write back to file
+        with open('projects.json', 'w') as f:
+            json.dump(projects, f, indent=2)
+        
+        print("✅ Successfully updated projects.json")
+        EOF
+        
+        python update_projects.py
 
-      - name: Commit and push
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add projects.json
-          git diff --cached --quiet || git commit -m "Add new project: ${{ github.event.inputs.projectJson.projectName || 'Unknown' }}"
+    - name: Verify the updated file
+      run: |
+        echo "=== Final projects.json content ==="
+        if [ -f projects.json ]; then
+          cat projects.json
+          echo "File size: $(wc -c < projects.json) bytes"
+        else
+          echo "❌ projects.json was not created!"
+          exit 1
+        fi
+
+    - name: Commit changes
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        
+        git add projects.json
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "Add new project: ${{ github.event.inputs.projectJson.projectName || 'Unknown project' }}"
           git push
+          echo "✅ Changes committed and pushed"
+        fi
