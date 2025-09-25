@@ -4,59 +4,14 @@
   <meta charset="UTF-8">
   <title>Project Input Form</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      padding: 2rem;
-    }
-    h1 {
-      text-align: center;
-    }
-    form {
-      max-width: 600px;
-      margin: auto;
-      background: #fff;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    label {
-      display: block;
-      margin-top: 1rem;
-      font-weight: bold;
-    }
-    input, textarea, select {
-      width: 100%;
-      padding: 0.6rem;
-      margin-top: 0.3rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-    button {
-      margin-top: 1.5rem;
-      padding: 0.8rem 1.5rem;
-      background: #0077cc;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #005fa3;
-    }
-    #output {
-      margin-top: 2rem;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-      white-space: pre-wrap;
-      background: #272822;
-      color: #f8f8f2;
-      padding: 1rem;
-      border-radius: 8px;
-      font-family: monospace;
-      font-size: 14px;
-    }
+    body { font-family: Arial, sans-serif; background: #f9f9f9; padding: 2rem; }
+    h1 { text-align: center; }
+    form { max-width: 600px; margin: auto; background: #fff; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    label { display: block; margin-top: 1rem; font-weight: bold; }
+    input, textarea, select { width: 100%; padding: 0.6rem; margin-top: 0.3rem; border: 1px solid #ccc; border-radius: 6px; }
+    button { margin-top: 1.5rem; padding: 0.8rem 1.5rem; background: #0077cc; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+    button:hover { background: #005fa3; }
+    #output { margin-top: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; white-space: pre-wrap; background: #272822; color: #f8f8f2; padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 14px; }
   </style>
 </head>
 <body>
@@ -66,7 +21,7 @@
     <input type="text" id="projectName" required>
 
     <label for="creators">Creators (comma-separated)</label>
-    <input type="text" id="creators" placeholder="For Example: Bob">
+    <input type="text" id="creators">
 
     <label for="description">Description</label>
     <textarea id="description" rows="3"></textarea>
@@ -103,29 +58,21 @@
         studielast: document.getElementById('studielast').value.trim()
       };
 
-      // Display JSON locally for debugging
       document.getElementById('output').textContent = JSON.stringify(projectData, null, 2);
 
       try {
-        // Properly declare 'res'
         const res = await fetch("/.netlify/functions/triggerWorkflow", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(projectData)
         });
 
-        let result;
+        const text = await res.text();
         try {
-          result = await res.json();
+          const result = JSON.parse(text);
+          alert(result.success ? "Project submitted!" : "Error: " + (result.error || text));
         } catch {
-          result = { success: false, error: res.statusText };
-        }
-
-        // Always show popup
-        if (res.ok && result.success) {
-          alert("Project submitted!");
-        } else {
-          alert("Error submitting project: " + (result.error || res.statusText));
+          alert("Error: " + text);
         }
       } catch (err) {
         alert("Error submitting project: " + err.message);
