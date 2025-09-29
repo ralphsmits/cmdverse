@@ -12,102 +12,61 @@ jobs:
   update-json:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.TOKEN_GITHUB }}
-        fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Debug received input
-      run: |
-        echo "Raw input received:"
-        echo "${{ github.event.inputs.projectJson }}"
-        
-        # Save input to file for debugging
-        echo "${{ github.event.inputs.projectJson }}" > input.json
-        echo "Input saved to input.json:"
-        cat input.json
-        
-        # Validate JSON in Python
-        python - << 'EOF'
-import json
-try:
-    with open('input.json') as f:
-        data = json.load(f)
-    print("✅ JSON validation passed")
-except json.JSONDecodeError as e:
-    print(f"❌ JSON validation failed: {e}")
-    exit(1)
-EOF
+      - name: Save project JSON
+        run: |
+          echo '${{ github.event.inputs.projectJson }}' > input.json
 
-    - name: Create individual project JSON file
-      run: |
-        python - << 'EOF'
+      - name: Validate JSON
+        run: |
+          python -c "import json; json.load(open('input.json')); print('✅ JSON valid')"
+
+      - name: Create individual project JSON file
+        run: |
+          python - << 'EOF'
 import json, os, re
 from datetime import datetime
 
 with open('input.json') as f:
     project = json.load(f)
 
-project_name = project.get('projectName', 'unnamed-project')
-slug = re.sub(r'[^a-z0-9-]', '', project_name.lower().replace(' ', '-'))
+slug = re.sub(r'[^a-z0-9-]', '', project.get('projectName','unnamed').lower().replace(' ','-'))
 timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 filename = f"projects/{slug}-{timestamp}.json"
-
 os.makedirs('projects', exist_ok=True)
-
 with open(filename, 'w') as f:
     json.dump(project, f, indent=2)
-
-print(f"✅ Project saved as: {filename}")
-# Save filename to GitHub output
-print(f"filename={filename}" >> os.environ['GITHUB_OUTPUT'])
+print(f"✅ Created: {filename}")
 EOF
 
-    - name: Create or update projects index
-      run: |
-        python - << 'EOF'
+      - name: Update projects index
+        run: |
+          python - << 'EOF'
 import json, os, glob
 
-project_files = glob.glob('projects/*.json')
-projects_index = []
-
-for file_path in project_files:
-    try:
-        with open(file_path) as f:
-            data = json.load(f)
-        data['_file'] = os.path.basename(file_path)
-        projects_index.append(data)
-    except json.JSONDecodeError as e:
-        print(f"Warning: Could not read {file_path}: {e}")
-
-# Sort alphabetically by projectName
-projects_index.sort(key=lambda x: x.get('projectName', '').lower())
-
-with open('projects-index.json', 'w') as f:
-    json.dump(projects_index, f, indent=2)
-
-print(f"✅ Projects index created with {len(projects_index)} projects")
+index = []
+for f in glob.glob("projects/*.json"):
+    with open(f) as pf:
+        data = json.load(pf)
+        data["_file"] = os.path.basename(f)
+        index.append(data)
+index.sort(key=lambda x: x.get("projectName","").lower())
+with open("projects-index.json","w") as out:
+    json.dump(index,out,indent=2)
+print(f"✅ Projects index updated: {len(index)} items")
 EOF
 
-    - name: Commit changes
-      run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-
-        PROJECT_NAME=$(python - << 'EOF'
-import json
-with open('input.json') as f:
-    data = json.load(f)
-print(data.get('projectName', 'Unknown project'))
-EOF
-)
-
-        git add projects/ projects-index.json
-        if git diff --staged --quiet; then
-          echo "No changes to commit"
-        else
-          git commit -m "Add new project: $PROJECT_NAME"
-          git push
-          echo "✅ Changes committed and pushed"
-        fi
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add projects/ projects-index.json
+          if git diff --staged --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Add new project via workflow_dispatch"
+            git push
+          fi
