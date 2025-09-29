@@ -40,28 +40,14 @@
     <label for="studielast">Studielast</label>
     <input type="text" id="studielast">
 
-    <label for="media">Upload Images</label>
-    <input type="file" id="media" multiple accept="image/*,video/*">
-    
     <button type="submit">Upload Project</button>
   </form>
 
   <div id="output"></div>
+
   <script>
 document.getElementById('projectForm').addEventListener('submit', async function(event) {
   event.preventDefault();
-
-  const files = document.getElementById('media').files;
-  const filePromises = Array.from(files).map(file => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve({ filename: file.name, content: reader.result.split(',')[1] }); // base64 content
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  });
-
-  const mediaFiles = await Promise.all(filePromises);
 
   const projectData = {
     projectName: document.getElementById('projectName').value.trim(),
@@ -69,9 +55,11 @@ document.getElementById('projectForm').addEventListener('submit', async function
     description: document.getElementById('description').value.trim(),
     category: document.getElementById('category').value,
     year: parseInt(document.getElementById('year').value),
-    studielast: document.getElementById('studielast').value.trim(),
-    mediaFiles // base64 files
+    studielast: document.getElementById('studielast').value.trim()
   };
+
+  // Show what's being sent
+  document.getElementById('output').textContent = 'Sending: ' + JSON.stringify(projectData, null, 2);
 
   try {
     const response = await fetch("/.netlify/functions/triggerWorkflow", {
@@ -81,13 +69,18 @@ document.getElementById('projectForm').addEventListener('submit', async function
     });
 
     const result = await response.json();
-    document.getElementById('output').textContent = JSON.stringify(result, null, 2);
-    if (result.success) alert("✅ Project submitted successfully!");
-    else alert("❌ Error: " + (result.error || "Unknown error"));
+    document.getElementById('output').textContent = 'Response: ' + JSON.stringify(result, null, 2);
+    
+    if (response.ok && result.success) {
+      alert("✅ Project submitted successfully! Check GitHub Actions for progress.");
+    } else {
+      alert("❌ Error: " + (result.error || 'Unknown error'));
+    }
   } catch (err) {
-    document.getElementById('output').textContent = "Error: " + err.message;
+    document.getElementById('output').textContent = 'Error: ' + err.message;
+    alert("❌ Network error: " + err.message);
   }
 });
-</script>
+  </script>
 </body>
 </html>
