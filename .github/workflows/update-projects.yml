@@ -36,15 +36,16 @@ jobs:
           exit 1
         fi
 
-    - name: Create or update projects.json
+    - name: Create individual project JSON file
       run: |
-        # Create Python script to handle JSON merging
-        cat > update_projects.py << 'EOF'
+        # Create Python script to handle individual project files
+        cat > create_project_file.py << 'EOF'
         import json
         import os
-        import sys
+        import re
+        from datetime import datetime
         
-        print("=== Starting projects.json update ===")
+        print("=== Creating individual project file ===")
         
         # Read the new project data
         with open('input.json', 'r') as f:
@@ -52,49 +53,91 @@ jobs:
         
         print(f"New project data: {json.dumps(new_project, indent=2)}")
         
-        # Read existing projects or create empty array
-        if os.path.exists('projects.json'):
-            with open('projects.json', 'r') as f:
-                try:
-                    projects = json.load(f)
-                    print(f"Found existing projects.json with {len(projects)} projects")
-                except json.JSONDecodeError:
-                    print("projects.json is invalid, starting fresh")
-                    projects = []
-        else:
-            print("projects.json not found, creating new file")
-            projects = []
+        # Generate a safe filename from project name
+        project_name = new_project.get('projectName', 'unnamed-project')
         
-        # Add new project
-        projects.append(new_project)
-        print(f"Added project. Total projects now: {len(projects)}")
+        # Create slug: lowercase, replace spaces with hyphens, remove special chars
+        slug = re.sub(r'[^a-z0-9-]', '', project_name.lower().replace(' ', '-'))
         
-        # Write back to file
-        with open('projects.json', 'w') as f:
-            json.dump(projects, f, indent=2)
+        # Add timestamp to ensure uniqueness
+        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        filename = f"projects/{slug}-{timestamp}.json"
         
-        print("✅ Successfully updated projects.json")
+        # Create projects directory if it doesn't exist
+        os.makedirs('projects', exist_ok=True)
+        
+        # Write individual project file
+        with open(filename, 'w') as f:
+            json.dump(new_project, f, indent=2)
+        
+        print(f"✅ Project saved as: {filename}")
+        
+        # Return the filename for use in commit message
+        print(f"::set-output name=filename::{filename}")
         EOF
         
-        python update_projects.py
+        python create_project_file.py
 
-    - name: Verify the updated file
+    - name: Create or update projects index
       run: |
-        echo "=== Final projects.json content ==="
-        if [ -f projects.json ]; then
-          cat projects.json
-          echo "File size: $(wc -c < projects.json) bytes"
-        else
-          echo "❌ projects.json was not created!"
-          exit 1
-        fi
+        # Create Python script to maintain an index of all projects
+        cat > update_projects_index.py << 'EOF'
+        import json
+        import os
+        import glob
+        
+        print("=== Updating projects index ===")
+        
+        # Find all project JSON files
+        project_files = glob.glob('projects/*.json')
+        print(f"Found {len(project_files)} project files")
+        
+        projects_index = []
+        
+        for file_path in project_files:
+            try:
+                with open(file_path, 'r') as f:
+                    project_data = json.load(f)
+                
+                # Add filename reference to the index
+                project_data['_file'] = os.path.basename(file_path)
+                projects_index.append(project_data)
+                
+            except json.JSONDecodeError as e:
+                print(f"Warning: Could not read {file_path}: {e}")
+        
+        # Sort projects by date or name (adjust as needed)
+        projects_index.sort(key=lambda x: x.get('projectName', '').lower())
+        
+        # Write index file
+        with open('projects-index.json', 'w') as f:
+            json.dump(projects_index, f, indent=2)
+        
+        print(f"✅ Projects index created with {len(projects_index)} projects")
+        EOF
+        
+        python update_projects_index.py
 
     - name: Commit changes
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         
-        git add projects.json
+        # Get the new project filename
+        PROJECT_FILE=$(python -c "
+        import json, re
+        with open('input.json', 'r') as f:
+            project = json.load(f)
+        name = project.get('projectName', 'unnamed-project')
+        slug = re.sub(r'[^a-z0-9-]', '', name.lower().replace(' ', '-'))
+        # Find the actual file that was created
+        import glob
+        files = glob.glob(f'projects/{slug}-*.json')
+        if files:
+            print(files[0])
+        ")
+        
+        git add projects/ projects-index.json
         if git diff --staged --quiet; then
           echo "No changes to commit"
         else
