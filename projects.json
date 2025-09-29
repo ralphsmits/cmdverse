@@ -1,2 +1,12 @@
 [
+  {
+    "projectName": "Test",
+    "creators": [
+      "Test"
+    ],
+    "description": "Test",
+    "category": "Void",
+    "year": 2025,
+    "studielast": "Test"
+  }
 ]
