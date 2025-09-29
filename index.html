@@ -46,10 +46,9 @@
 
   /* Phone Container */
   .phone-container {
-    max-width: 360px; /* typical phone width */
-    margin: 4rem auto;
+    display: inline-block; /* shrink-wrap the form */
     position: relative;
-    transform: translateZ(0);
+    margin: 4rem auto;
     animation: float 6s ease-in-out infinite;
   }
 
@@ -60,12 +59,12 @@
 
   /* Phone Overlay Image */
   .phone-overlay {
-    width: 100%;
-    display: block;
-    pointer-events: none; /* so form is clickable */
     position: absolute;
     top: 0;
     left: 0;
+    width: 100%;   /* fill the container (matches form size) */
+    height: 100%;  /* match form height */
+    pointer-events: none;
     z-index: 10;
   }
 
@@ -73,12 +72,14 @@
   form {
     position: relative;
     background: rgba(255,255,255,0.9);
-    padding: 2rem;
-    border-radius: 32px; /* round edges to fit phone */
-    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    padding: 3rem;
+    border-radius: 36px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
     z-index: 5;
     display: flex;
     flex-direction: column;
+    font-size: 1rem;
+    width: 100%;    /* expand naturally within container */
   }
 
   label { margin-top: 1rem; font-weight: bold; color: #333; }
@@ -114,21 +115,16 @@
     transform: scale(1.05) translateY(-3px);
     box-shadow: 0 10px 20px rgba(0,0,0,0.2);
   }
-
   #output {
     margin-top: 2rem;
-    max-width: 360px;
-    margin-left: auto;
-    margin-right: auto;
-    white-space: pre-wrap;
+    width: 100%;
+    max-width: none;
     background: #272822;
     color: #f8f8f2;
     padding: 1rem;
-    border-radius: 12px;
+    border-radius: 14px;
     font-family: 'Courier New', monospace;
-    font-size: 14px;
-    transform: translateZ(0);
-  }
+    font-siz
 </style>
 </head>
 <body>
