@@ -138,7 +138,7 @@ form {
   
 <div class="parallax-layer layer1"></div>
 <div class="parallax-layer layer2"></div>
-<br>
+
 <h1>Upload jouw project op CMD Verse</h1>
 
 <form id="projectForm">
@@ -165,9 +165,6 @@ form {
   <label for="studielast">Studielast</label>
   <input type="text" id="studielast">
 
-  <label for="imageUrl">Link naar afbeelding van project</label>
-  <input type="url" id="imageUrl" placeholder="https://example.com/image.png">
-
   <button type="submit">Upload Project</button>
 </form>
 
@@ -177,15 +174,14 @@ form {
 document.getElementById('projectForm').addEventListener('submit', async function(event) {
   event.preventDefault();
 
-const projectData = {
-  projectName: document.getElementById('projectName').value.trim(),
-  creators: document.getElementById('creators').value.split(',').map(s => s.trim()).filter(s => s),
-  description: document.getElementById('description').value.trim(),
-  category: document.getElementById('category').value,
-  year: parseInt(document.getElementById('year').value),
-  studielast: document.getElementById('studielast').value.trim(),
-  imageUrl: document.getElementById('imageUrl').value.trim() // new field
-};
+  const projectData = {
+    projectName: document.getElementById('projectName').value.trim(),
+    creators: document.getElementById('creators').value.split(',').map(s => s.trim()).filter(s => s),
+    description: document.getElementById('description').value.trim(),
+    category: document.getElementById('category').value,
+    year: parseInt(document.getElementById('year').value),
+    studielast: document.getElementById('studielast').value.trim()
+  };
 
   document.getElementById('output').textContent = 'Sending: ' + JSON.stringify(projectData, null, 2);
 
