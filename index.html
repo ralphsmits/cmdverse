@@ -13,6 +13,7 @@
     overflow-x: hidden;
     perspective: 1px; 
     transform-style: preserve-3d;
+    padding: 20px;
   }
 
   h1 {
@@ -61,12 +62,14 @@
   /* Phone Overlay Image */
   .phone-overlay {
     width: 100%;
+    height: auto;
     display: block;
     pointer-events: none; /* so form is clickable */
     position: absolute;
     top: 0;
     left: 0;
     z-index: 10;
+    border-radius: 32px; /* Match form border radius */
   }
 
   /* Form inside the phone */
@@ -139,9 +142,6 @@
 <h1>Upload jouw project op CMD Verse</h1>
 
 <div class="phone-container">
-  <!-- Transparent phone image -->
-  <img src="https://lh3.googleusercontent.com/rd-d/ALs6j_Hhs5VDcP0fhNChI3Zj7pe-9tKyuB3Hne71cC3SE15EviO3VEFktoXCj6Z20dKXBsGj8l2i9nVFDIQTd9NMoN6xlqA8am9HxhcOEqQpv_yQSss9UnGCjRHen0dkVlrqKRjDpehzNK8doW6koksX9exIMvPEkLtO2dnhbMy9aSwu1AZ4ZDCASdmzT5Fi6ZnpNJVgy8RHqwU1yCj48F3dcOj2uhkaX9XWVCaJspMRa2zOu1xy4SUrZC-CV0BTQvSlMxu6JnhSf3Z2GXgM2rRTHxh9GiIY0mlG6SkLgvuPbroqEGj_E6pfAUYzCbDqDmu5eW5--nVOVlzDB7APRCpwVQ4N119_RYDpIplsIAmVjUBEpZtiU6S4DDIg2JHaPA2U0RXnQINhPRew-6961m0k6p8dAkLfVCLVGCOmmQl9mmjI-c58Djd8uf8SyRGg616tePjB0pvYbZGservQbCZ4L7RomffR3inyM3w14b10Bzj91i25BNhx182Gvm9MVmil2vqk28EFxbw__i97pvs2V9xCUOX9zcPJVfXcbRO5gSUpP3Fei0hroaHO-kAD7Cil5BD4cVyueEgbBV8mKu9NZcN4cPB2g5sSIMYuo0aQT0vR6SOB6IM9qM2uftL7qx92yigEseGrJ3GyuA-JATP_8CU9_z1VoT4oJrs8dVah0QnEnufMn2-k1LnrpjefRdh-3XYhjx8Iuk3zX6DzkYrFfViKokOz0LXP_ZkXoD6N9PSGKm5qTYPHn9K-MOntZ_xwimaFHIIxxxQGlxP4bbd1juW_AaUVZiXxb6-bLeVob2LgkuZEqpRu2PBnf5uH6WLxihPpSd1b_9MIkc7vo_MjMfgqdiiVv6UnMcfdQW_SbmKB4n9xDLCCEt4QaOHwFQsOFkyOYG7sSv79Je72GWuKaNZk1pWJRZYuTuoPKeci-YbvjNlONoXJx3W1EAs6re7WhRy4MmmN2tf_ZvRETxDqIYBCWYlUyXVkqz6EaTaFWvf5Ik9mKCBdHxWBIwqrYEXHJC2skdVKUrNmJJGKBLSv6u9HUM-7-aJaWw-yOEDasS52rpolzRdyuILlltMgkx67pMXac3BJuezX7otF-qGoIcg=w2880-h1410?auditContext=prefetch" class="phone-overlay" alt="Phone Overlay">
-
   <!-- Form positioned inside phone -->
   <form id="projectForm">
     <label for="projectName">Project Name</label>
@@ -169,6 +169,9 @@
 
     <button type="submit">Upload Project</button>
   </form>
+  
+  <!-- Transparent phone image -->
+  <img src="https://lh3.googleusercontent.com/rd-d/ALs6j_Hhs5VDcP0fhNChI3Zj7pe-9tKyuB3Hne71cC3SE15EviO3VEFktoXCj6Z20dKXBsGj8l2i9nVFDIQTd9NMoN6xlqA8am9HxhcOEqQpv_yQSss9UnGCjRHen0dkVlrqKRjDpehzNK8doW6koksX9exIMvPEkLtO2dnhbMy9aSwu1AZ4ZDCASdmzT5Fi6ZnpNJVgy8RHqwU1yCj48F3dcOj2uhkaX9XWVCaJspMRa2zOu1xy4SUrZC-CV0BTQvSlMxu6JnhSf3Z2GXgM2rRTHxh9GiIY0mlG6SkLgvuPbroqEGj_E6pfAUYzCbDqDmu5eW5--nVOVlzDB7APRCpwVQ4N119_RYDpIplsIAmVjUBEpZtiU6S4DDIg2JHaPA2U0RXnQINhPRew-6961m0k6p8dAkLfVCLVGCOmmQl9mmjI-c58Djd8uf8SyRGg616tePjB0pvYbZGservQbCZ4L7RomffR3inyM3w14b10Bzj91i25BNhx182Gvm9MVmil2vqk28EFxbw__i97pvs2V9xCUOX9zcPJVfXcbRO5gSUpP3Fei0hroaHO-kAD7Cil5BD4cVyueEgbBV8mKu9NZcN4cPB2g5sSIMYuo0aQT0vR6SOB6IM9qM2uftL7qx92yigEseGrJ3GyuA-JATP_8CU9_z1VoT4oJrs8dVah0QnEnufMn2-k1LnrpjefRdh-3XYhjx8Iuk3zX6DzkYrFfViKokOz0LXP_ZkXoD6N9PSGKm5qTYPHn9K-MOntZ_xwimaFHIIxxxQGlxP4bbd1juW_AaUVZiXxb6-bLeVob2LgkuZEqpRu2PBnf5uH6WLxihPpSd1b_9MIkc7vo_MjMfgqdiiVv6UnMcfdQW_SbmKB4n9xDLCCEt4QaOHwFQsOFkyOYG7sSv79Je72GWuKaNZk1pWJRZYuTuoPKeci-YbvjNlONoXJx3W1EAs6re7WhRy4MmmN2tf_ZvRETxDqIYBCWYlUyXVkqz6EaTaFWvf5Ik9mKCBdHxWBIwqrYEXHJC2skdVKUrNmJJGKBLSv6u9HUM-7-aJaWw-yOEDasS52rpolzRdyuILlltMgkx67pMXac3BJuezX7otF-qGoIcg=w2880-h1410?auditContext=prefetch" class="phone-overlay" alt="Phone Overlay">
 </div>
 
 <div id="output"></div>
