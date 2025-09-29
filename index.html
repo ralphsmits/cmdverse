@@ -11,7 +11,7 @@
     font-family: 'Arial', sans-serif;
     background: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
     overflow-x: hidden;
-    perspective: 1px; /* for parallax effect */
+    perspective: 1px; 
     transform-style: preserve-3d;
   }
 
@@ -30,23 +30,58 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  form {
-    max-width: 600px;
+  /* Parallax Background */
+  .parallax-layer {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .layer1 { background: url('https://source.unsplash.com/1600x900/?technology,abstract') no-repeat center center / cover; transform: translateZ(-0.3px) scale(1.3); opacity: 0.2; }
+  .layer2 { background: url('https://source.unsplash.com/1600x900/?space,galaxy') no-repeat center center / cover; transform: translateZ(-0.1px) scale(1.1); opacity: 0.15; }
+
+  /* Phone Container */
+  .phone-container {
+    max-width: 360px; /* typical phone width */
     margin: 4rem auto;
-    background: rgba(255,255,255,0.95);
-    padding: 2rem;
-    border-radius: 16px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    position: relative;
     transform: translateZ(0);
-    animation: fadeIn 1.5s ease forwards;
+    animation: float 6s ease-in-out infinite;
   }
 
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(50px); }
-    to { opacity: 1; transform: translateY(0); }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
   }
 
-  label { display: block; margin-top: 1rem; font-weight: bold; color: #333; }
+  /* Phone Overlay Image */
+  .phone-overlay {
+    width: 100%;
+    display: block;
+    pointer-events: none; /* so form is clickable */
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+  }
+
+  /* Form inside the phone */
+  form {
+    position: relative;
+    background: rgba(255,255,255,0.9);
+    padding: 2rem;
+    border-radius: 32px; /* round edges to fit phone */
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+  }
+
+  label { margin-top: 1rem; font-weight: bold; color: #333; }
   input, textarea, select {
     width: 100%;
     padding: 0.6rem;
@@ -82,7 +117,7 @@
 
   #output {
     margin-top: 2rem;
-    max-width: 600px;
+    max-width: 360px;
     margin-left: auto;
     margin-right: auto;
     white-space: pre-wrap;
@@ -93,30 +128,7 @@
     font-family: 'Courier New', monospace;
     font-size: 14px;
     transform: translateZ(0);
-    animation: fadeIn 2s ease forwards;
   }
-
-  /* Background Parallax Layers */
-  .parallax-layer {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-    z-index: -1;
-  }
-
-  .layer1 { background: url('https://source.unsplash.com/1600x900/?technology,abstract') no-repeat center center / cover; transform: translateZ(-0.3px) scale(1.3); opacity: 0.2; }
-  .layer2 { background: url('https://source.unsplash.com/1600x900/?space,galaxy') no-repeat center center / cover; transform: translateZ(-0.1px) scale(1.1); opacity: 0.15; }
-
-  /* Floating animation for form */
-  form { animation: float 6s ease-in-out infinite; }
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-  }
-
 </style>
 </head>
 <body>
@@ -126,35 +138,41 @@
 
 <h1>Upload jouw project op CMD Verse</h1>
 
-<form id="projectForm">
-  <label for="projectName">Project Name</label>
-  <input type="text" id="projectName" required>
+<div class="phone-container">
+  <!-- Transparent phone image -->
+  <img src="https://lh3.googleusercontent.com/rd-d/ALs6j_Hhs5VDcP0fhNChI3Zj7pe-9tKyuB3Hne71cC3SE15EviO3VEFktoXCj6Z20dKXBsGj8l2i9nVFDIQTd9NMoN6xlqA8am9HxhcOEqQpv_yQSss9UnGCjRHen0dkVlrqKRjDpehzNK8doW6koksX9exIMvPEkLtO2dnhbMy9aSwu1AZ4ZDCASdmzT5Fi6ZnpNJVgy8RHqwU1yCj48F3dcOj2uhkaX9XWVCaJspMRa2zOu1xy4SUrZC-CV0BTQvSlMxu6JnhSf3Z2GXgM2rRTHxh9GiIY0mlG6SkLgvuPbroqEGj_E6pfAUYzCbDqDmu5eW5--nVOVlzDB7APRCpwVQ4N119_RYDpIplsIAmVjUBEpZtiU6S4DDIg2JHaPA2U0RXnQINhPRew-6961m0k6p8dAkLfVCLVGCOmmQl9mmjI-c58Djd8uf8SyRGg616tePjB0pvYbZGservQbCZ4L7RomffR3inyM3w14b10Bzj91i25BNhx182Gvm9MVmil2vqk28EFxbw__i97pvs2V9xCUOX9zcPJVfXcbRO5gSUpP3Fei0hroaHO-kAD7Cil5BD4cVyueEgbBV8mKu9NZcN4cPB2g5sSIMYuo0aQT0vR6SOB6IM9qM2uftL7qx92yigEseGrJ3GyuA-JATP_8CU9_z1VoT4oJrs8dVah0QnEnufMn2-k1LnrpjefRdh-3XYhjx8Iuk3zX6DzkYrFfViKokOz0LXP_ZkXoD6N9PSGKm5qTYPHn9K-MOntZ_xwimaFHIIxxxQGlxP4bbd1juW_AaUVZiXxb6-bLeVob2LgkuZEqpRu2PBnf5uH6WLxihPpSd1b_9MIkc7vo_MjMfgqdiiVv6UnMcfdQW_SbmKB4n9xDLCCEt4QaOHwFQsOFkyOYG7sSv79Je72GWuKaNZk1pWJRZYuTuoPKeci-YbvjNlONoXJx3W1EAs6re7WhRy4MmmN2tf_ZvRETxDqIYBCWYlUyXVkqz6EaTaFWvf5Ik9mKCBdHxWBIwqrYEXHJC2skdVKUrNmJJGKBLSv6u9HUM-7-aJaWw-yOEDasS52rpolzRdyuILlltMgkx67pMXac3BJuezX7otF-qGoIcg=w2880-h1410?auditContext=prefetch" class="phone-overlay" alt="Phone Overlay">
 
-  <label for="creators">Creators (voor meerderen; zorg voor een komma)</label>
-  <input type="text" id="creators">
+  <!-- Form positioned inside phone -->
+  <form id="projectForm">
+    <label for="projectName">Project Name</label>
+    <input type="text" id="projectName" required>
 
-  <label for="description">Description</label>
-  <textarea id="description" rows="3"></textarea>
+    <label for="creators">Creators (voor meerderen; zorg voor een komma)</label>
+    <input type="text" id="creators">
 
-  <label for="category">Design Principle</label>
-  <select id="category">
-    <option value="Void">Void</option>
-    <option value="Human">Human</option>
-    <option value="Tech">Tech</option>
-    <option value="Other">Story</option>
-  </select>
+    <label for="description">Description</label>
+    <textarea id="description" rows="3"></textarea>
 
-  <label for="year">Year</label>
-  <input type="number" id="year" min="1900" max="2100" value="2025">
+    <label for="category">Design Principle</label>
+    <select id="category">
+      <option value="Void">Void</option>
+      <option value="Human">Human</option>
+      <option value="Tech">Tech</option>
+      <option value="Other">Story</option>
+    </select>
 
-  <label for="studielast">Studielast</label>
-  <input type="text" id="studielast">
+    <label for="year">Year</label>
+    <input type="number" id="year" min="1900" max="2100" value="2025">
 
-  <button type="submit">Upload Project</button>
-</form>
+    <label for="studielast">Studielast</label>
+    <input type="text" id="studielast">
+
+    <button type="submit">Upload Project</button>
+  </form>
+</div>
 
 <div id="output"></div>
-<br>
+
 <script>
 document.getElementById('projectForm').addEventListener('submit', async function(event) {
   event.preventDefault();
@@ -191,5 +209,6 @@ document.getElementById('projectForm').addEventListener('submit', async function
   }
 });
 </script>
+
 </body>
 </html>
