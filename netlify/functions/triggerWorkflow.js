@@ -1,34 +1,61 @@
+import multiparty from "multiparty";
+import cloudinary from "cloudinary";
+
+// Auto-config via CLOUDINARY_URL in Netlify
+cloudinary.v2.config(true);
+
 export async function handler(event, context) {
   console.log("=== TRIGGER WORKFLOW START ===");
   console.log("HTTP Method:", event.httpMethod);
-  console.log("Raw body:", event.body);
 
   if (event.httpMethod !== "POST") {
     console.log("Rejected non-POST request");
     return { statusCode: 405, body: JSON.stringify({ error: "Only POST allowed" }) };
   }
 
+  // Parse multipart form data
+  const form = new multiparty.Form();
   let projectData;
+  let files = [];
+
   try {
-    projectData = JSON.parse(event.body);
-    console.log("Parsed projectData:", JSON.stringify(projectData, null, 2));
+    await new Promise((resolve, reject) => {
+      form.parse(event, (err, fields, f) => {
+        if (err) return reject(err);
+        try {
+          projectData = JSON.parse(fields.data[0]);
+          files = f.files?.files || [];
+          resolve();
+        } catch (parseErr) {
+          reject(parseErr);
+        }
+      });
+    });
   } catch (err) {
-    console.error("JSON parse error:", err);
-    return { statusCode: 400, body: JSON.stringify({ error: "Invalid JSON" }) };
+    console.error("Form parse / JSON error:", err);
+    return { statusCode: 400, body: JSON.stringify({ error: "Invalid form or JSON", details: err.message }) };
   }
 
+  console.log("Parsed projectData:", projectData);
+  console.log("Files to upload:", files.map(f => f.originalFilename));
+
+  // Upload files to Cloudinary
+  projectData.media = { urls: [] };
+  try {
+    for (const file of files) {
+      const result = await cloudinary.v2.uploader.upload(file.path, { resource_type: "auto" });
+      projectData.media.urls.push(result.secure_url);
+    }
+  } catch (uploadErr) {
+    console.error("Cloudinary upload error:", uploadErr);
+    return { statusCode: 500, body: JSON.stringify({ error: "Cloudinary upload failed", details: uploadErr.message }) };
+  }
+
+  // GitHub dispatch logic
   const repoOwner = "ralphsmits";
   const repoName = "cmdverse";
-  const workflowId = "update-projects.yml"; 
+  const workflowId = "update-projects.yml";
   const token = process.env.TOKEN_GITHUB;
-
-  console.log("Environment variables:", {
-    hasToken: !!token,
-    tokenLength: token ? token.length : 0,
-    repoOwner,
-    repoName,
-    workflowId
-  });
 
   if (!token) {
     console.error("Missing GitHub token");
@@ -38,12 +65,8 @@ export async function handler(event, context) {
   try {
     const requestBody = {
       ref: "main",
-      inputs: {
-        projectJson: JSON.stringify(projectData)
-      }
+      inputs: { projectJson: JSON.stringify(projectData) }
     };
-
-    console.log("Sending to GitHub API:", JSON.stringify(requestBody, null, 2));
 
     const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/actions/workflows/${workflowId}/dispatches`, {
       method: "POST",
@@ -56,52 +79,24 @@ export async function handler(event, context) {
       body: JSON.stringify(requestBody)
     });
 
-    console.log("GitHub API response status:", response.status);
-    console.log("GitHub API response headers:", Object.fromEntries(response.headers.entries()));
-
     const responseText = await response.text();
-    console.log("GitHub API response body:", responseText);
 
     if (response.status === 204) {
-      // 204 No Content is actually success for workflow dispatch
       console.log("Workflow triggered successfully (204 No Content)");
       return { 
         statusCode: 200, 
-        body: JSON.stringify({ 
-          success: true, 
-          message: "Workflow triggered successfully",
-          workflowUrl: `https://github.com/${repoOwner}/${repoName}/actions`
-        }) 
+        body: JSON.stringify({ success: true, projectData, workflowUrl: `https://github.com/${repoOwner}/${repoName}/actions` }) 
       };
     }
 
     if (!response.ok) {
       console.error("GitHub API error:", response.status, responseText);
-      return { 
-        statusCode: response.status, 
-        body: JSON.stringify({ 
-          error: `GitHub API error: ${response.status}`,
-          details: responseText 
-        }) 
-      };
+      return { statusCode: response.status, body: JSON.stringify({ error: `GitHub API error: ${response.status}`, details: responseText }) };
     }
 
-    return { 
-      statusCode: 200, 
-      body: JSON.stringify({ 
-        success: true, 
-        message: "Workflow triggered",
-        response: responseText 
-      }) 
-    };
+    return { statusCode: 200, body: JSON.stringify({ success: true, projectData, response: responseText }) };
   } catch (err) {
     console.error("Error calling GitHub API:", err);
-    return { 
-      statusCode: 500, 
-      body: JSON.stringify({ 
-        error: "Network error", 
-        details: err.message 
-      }) 
-    };
+    return { statusCode: 500, body: JSON.stringify({ error: "Network error", details: err.message }) };
   }
 }
