@@ -2,15 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>CMD Verse with 3D Backdrop</title>
+<title>CMD Verse with 3D FBX Backdrop</title>
 <style>
   body, html {
-    margin: 0; 
-    padding: 0; 
-    width: 100%; 
-    height: 100%; 
-    overflow: hidden; 
-    font-family: Arial, sans-serif;
+    margin: 0; padding: 0;
+    width: 100%; height: 100%;
+    overflow: hidden; font-family: Arial, sans-serif;
   }
 
   #canvas-container {
@@ -48,22 +45,16 @@
   }
 
   input, textarea, select { 
-    padding: 0.8rem; 
-    margin-top: 0.3rem; 
-    font-size: 1rem; 
+    padding: 0.8rem; margin-top: 0.3rem; font-size: 1rem; 
   }
 
   button { 
-    padding: 1rem 1.8rem; 
-    font-size: 1rem; 
-    margin-top: 1.5rem; 
-    background: linear-gradient(90deg,#ff6a00,#ee0979); 
-    color:white; border:none; border-radius:8px; cursor:pointer; 
+    padding: 1rem 1.8rem; font-size: 1rem; margin-top: 1.5rem; 
+    background: linear-gradient(90deg,#ff6a00,#ee0979); color:white; border:none; border-radius:8px; cursor:pointer; 
   }
 
   button:hover { 
-    transform: scale(1.05) translateY(-3px); 
-    box-shadow:0 10px 20px rgba(0,0,0,0.2); 
+    transform: scale(1.05) translateY(-3px); box-shadow:0 10px 20px rgba(0,0,0,0.2); 
   }
 
   #output {
@@ -119,9 +110,9 @@
 
 <div id="output"></div>
 
-<!-- Three.js and GLTFLoader -->
+<!-- Three.js and FBXLoader -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/FBXLoader.js"></script>
 
 <script>
   // Three.js setup
@@ -135,20 +126,19 @@
   renderer.setSize(window.innerWidth, window.innerHeight);
   container.appendChild(renderer.domElement);
 
-  // Light
+  // Lights
   const ambient = new THREE.AmbientLight(0xffffff, 0.7);
   scene.add(ambient);
   const directional = new THREE.DirectionalLight(0xffffff, 0.8);
   directional.position.set(5,10,7.5);
   scene.add(directional);
 
-  // Load glTF
-  const loader = new THREE.GLTFLoader();
-  loader.load('result.gltf', function(gltf){
-    const model = gltf.scene;
-    scene.add(model);
-    model.scale.set(1.5,1.5,1.5); 
-    model.position.set(0,0,-1); 
+  // Load FBX
+  const loader = new THREE.FBXLoader();
+  loader.load('BOB.fbx', function(object){
+    scene.add(object);
+    object.scale.set(0.01,0.01,0.01); // adjust depending on your FBX units
+    object.position.set(0,0,-1);
   });
 
   // Animate background model
