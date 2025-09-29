@@ -4,10 +4,15 @@
 <meta charset="UTF-8">
 <title>CMD Verse</title>
 <style>
-
-  html, body {
-  height: 100%;
+html, body {
+  width: 100%;
   min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  position: relative; /* ensure absolute inside container is positioned correctly */
 }
   /* Basic Reset */
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -109,19 +114,27 @@ form {
 </style>
 </head>
 <body>
-<!-- Replace your parallax-layer divs with this video element at the top of <body> -->
-<video autoplay muted loop id="bgVideo" style="
-  position: fixed;
-  top: 0;
-  left: 0;
+<!-- Video container that scrolls with the page -->
+<div id="video-container" style="
+  position: relative;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  z-index: -1;
+  min-height: 100vh;
+  overflow: hidden;
 ">
-  <source src="Loop.mp4" type="video/mp4">
-  Your browser does not support HTML5 video.
-</video>
+  <video autoplay muted loop id="bgVideo" style="
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+  ">
+    <source src="Loop.mp4" type="video/mp4">
+    Your browser does not support HTML5 video.
+  </video>
+</div>
   
 <div class="parallax-layer layer1"></div>
 <div class="parallax-layer layer2"></div>
