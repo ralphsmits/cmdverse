@@ -40,14 +40,19 @@
     <label for="studielast">Studielast</label>
     <input type="text" id="studielast">
 
+    <label for="media">Upload Images</label>
+    <input type="file" id="media" multiple accept="image/*,video/*">
+    
     <button type="submit">Upload Project</button>
   </form>
 
   <div id="output"></div>
 
-  <script>
+<script>
 document.getElementById('projectForm').addEventListener('submit', async function(event) {
   event.preventDefault();
+
+  const files = document.getElementById('media').files; // New file input
 
   const projectData = {
     projectName: document.getElementById('projectName').value.trim(),
@@ -58,19 +63,23 @@ document.getElementById('projectForm').addEventListener('submit', async function
     studielast: document.getElementById('studielast').value.trim()
   };
 
-  // Show what's being sent
-  document.getElementById('output').textContent = 'Sending: ' + JSON.stringify(projectData, null, 2);
+  const formData = new FormData();
+  formData.append("data", JSON.stringify(projectData));
+  for (let file of files) {
+    formData.append("files", file);
+  }
+
+  document.getElementById('output').textContent = "Uploading...";
 
   try {
     const response = await fetch("/.netlify/functions/triggerWorkflow", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(projectData)
+      body: formData // no JSON headers for FormData
     });
 
     const result = await response.json();
     document.getElementById('output').textContent = 'Response: ' + JSON.stringify(result, null, 2);
-    
+
     if (response.ok && result.success) {
       alert("✅ Project submitted successfully! Check GitHub Actions for progress.");
     } else {
@@ -81,6 +90,6 @@ document.getElementById('projectForm').addEventListener('submit', async function
     alert("❌ Network error: " + err.message);
   }
 });
-  </script>
+</script>
 </body>
 </html>
