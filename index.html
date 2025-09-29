@@ -1,51 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>CMD Verse</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f9f9f9; padding: 2rem; }
-    h1 { text-align: center; }
-    form { max-width: 600px; margin: auto; background: #fff; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    label { display: block; margin-top: 1rem; font-weight: bold; }
-    input, textarea, select { width: 100%; padding: 0.6rem; margin-top: 0.3rem; border: 1px solid #ccc; border-radius: 6px; }
-    button { margin-top: 1.5rem; padding: 0.8rem 1.5rem; background: #0077cc; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
-    button:hover { background: #005fa3; }
-    #output { margin-top: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; white-space: pre-wrap; background: #272822; color: #f8f8f2; padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 14px; }
-  </style>
+<meta charset="UTF-8">
+<title>CMD Verse</title>
+<style>
+  /* Basic Reset */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+    overflow-x: hidden;
+    perspective: 1px; /* for parallax effect */
+    transform-style: preserve-3d;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 3rem;
+    margin-top: 2rem;
+    background: linear-gradient(90deg, #ff6a00, #ee0979);
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: slideIn 1.5s ease-out forwards;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-50px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  form {
+    max-width: 600px;
+    margin: 4rem auto;
+    background: rgba(255,255,255,0.95);
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    transform: translateZ(0);
+    animation: fadeIn 1.5s ease forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(50px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  label { display: block; margin-top: 1rem; font-weight: bold; color: #333; }
+  input, textarea, select {
+    width: 100%;
+    padding: 0.6rem;
+    margin-top: 0.3rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: #0077cc;
+    box-shadow: 0 0 10px rgba(0,119,204,0.3);
+    outline: none;
+    transform: scale(1.02);
+  }
+
+  button {
+    margin-top: 1.5rem;
+    padding: 0.8rem 1.5rem;
+    background: linear-gradient(90deg, #ff6a00, #ee0979);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  button:hover {
+    transform: scale(1.05) translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+  }
+
+  #output {
+    margin-top: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    white-space: pre-wrap;
+    background: #272822;
+    color: #f8f8f2;
+    padding: 1rem;
+    border-radius: 12px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    transform: translateZ(0);
+    animation: fadeIn 2s ease forwards;
+  }
+
+  /* Background Parallax Layers */
+  .parallax-layer {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .layer1 { background: url('https://source.unsplash.com/1600x900/?technology,abstract') no-repeat center center / cover; transform: translateZ(-0.3px) scale(1.3); opacity: 0.2; }
+  .layer2 { background: url('https://source.unsplash.com/1600x900/?space,galaxy') no-repeat center center / cover; transform: translateZ(-0.1px) scale(1.1); opacity: 0.15; }
+
+  /* Floating animation for form */
+  form { animation: float 6s ease-in-out infinite; }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+</style>
 </head>
 <body>
-  <h1>Upload jouw project op CMD Verse</h1>
-  <form id="projectForm">
-    <label for="projectName">Project Name</label>
-    <input type="text" id="projectName" required>
 
-    <label for="creators">Creators (voor meerderen; zorg voor een komma)</label>
-    <input type="text" id="creators">
+<div class="parallax-layer layer1"></div>
+<div class="parallax-layer layer2"></div>
 
-    <label for="description">Description</label>
-    <textarea id="description" rows="3"></textarea>
+<h1>Upload jouw project op CMD Verse</h1>
 
-    <label for="category">Design Principle</label>
-    <select id="category">
-      <option value="Void">Void</option>
-      <option value="Human">Human</option>
-      <option value="Tech">Tech</option>
-      <option value="Other">Story</option>
-    </select>
+<form id="projectForm">
+  <label for="projectName">Project Name</label>
+  <input type="text" id="projectName" required>
 
-    <label for="year">Year</label>
-    <input type="number" id="year" min="1900" max="2100" value="2025">
+  <label for="creators">Creators (voor meerderen; zorg voor een komma)</label>
+  <input type="text" id="creators">
 
-    <label for="studielast">Studielast</label>
-    <input type="text" id="studielast">
+  <label for="description">Description</label>
+  <textarea id="description" rows="3"></textarea>
 
-    <button type="submit">Upload Project</button>
-  </form>
+  <label for="category">Design Principle</label>
+  <select id="category">
+    <option value="Void">Void</option>
+    <option value="Human">Human</option>
+    <option value="Tech">Tech</option>
+    <option value="Other">Story</option>
+  </select>
 
-  <div id="output"></div>
+  <label for="year">Year</label>
+  <input type="number" id="year" min="1900" max="2100" value="2025">
 
-  <script>
+  <label for="studielast">Studielast</label>
+  <input type="text" id="studielast">
+
+  <button type="submit">Upload Project</button>
+</form>
+
+<div id="output"></div>
+
+<script>
 document.getElementById('projectForm').addEventListener('submit', async function(event) {
   event.preventDefault();
 
@@ -58,7 +168,6 @@ document.getElementById('projectForm').addEventListener('submit', async function
     studielast: document.getElementById('studielast').value.trim()
   };
 
-  // Show what's being sent
   document.getElementById('output').textContent = 'Sending: ' + JSON.stringify(projectData, null, 2);
 
   try {
@@ -81,6 +190,6 @@ document.getElementById('projectForm').addEventListener('submit', async function
     alert("❌ Network error: " + err.message);
   }
 });
-  </script>
+</script>
 </body>
 </html>
