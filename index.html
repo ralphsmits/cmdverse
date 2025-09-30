@@ -17,13 +17,20 @@ body {
   /* Basic Reset */
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  body {
-    font-family: 'Arial', sans-serif;
-    background: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
-    overflow-x: hidden;
-    perspective: 1px; /* for parallax effect */
-    transform-style: preserve-3d;
-  }
+@font-face {
+  font-family: 'NeueRegrade';
+  src: url('font/Neue Regrade Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+/* Apply to the whole page */
+body {
+  font-family: 'NeueRegrade', Arial, sans-serif;
+  background: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+  overflow-x: hidden;
+  perspective: 1px;
+  transform-style: preserve-3d;
+}
 
   h1 {
     text-align: center;
