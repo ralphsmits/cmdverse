@@ -23,6 +23,22 @@ body {
   font-weight: normal;
   font-style: normal;
 }
+
+  @font-face {
+  font-family: 'NeueRegrade';
+  src: url('font/Neue Regrade Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* Example if you also had an italic */
+@font-face {
+  font-family: 'NeueRegrade';
+  src: url('font/Neue Regrade Italic.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+}
+  
 /* Apply to the whole page */
 body {
   font-family: 'NeueRegrade', Arial, sans-serif;
@@ -33,6 +49,7 @@ body {
 }
 
   h1 {
+    font-weight: bold;
     text-align: center;
     font-size: 3rem;
     background: white;
