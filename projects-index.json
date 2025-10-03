@@ -1,47 +1,15 @@
 [
   {
-    "projectName": "Multiphonic",
+    "projectName": "DOORDEWEEKS",
     "creators": [
       "Ralph Smits",
-      "Dani\u00ebl Groenenboom"
+      "Robbe van Broekhoven",
+      "Luuk Roovers"
     ],
-    "description": "A cloud-based platform where musicians collaborate in real time, layering tracks and creating harmonies together-no matter where they are in the world.",
+    "description": "Founded in January 2024 by Luuk Roovers, Robbe van Broekhoven, and Ralph Smits, DOORDEWEEKS began as a collaborative experiment during the Free Space module at Avans University of Applied Sciences. Over the span of two intensive weeks, we explored multiple musical genres and produced a diverse collection of songs.",
     "category": "Human",
     "year": 2025,
-    "studielast": "https://cdn.myportfolio.com/3b2c54e9-8c5d-410c-9a71-38340d238cb5/ee67b912-38ca-4b7c-9255-180c946e43fa_rwc_14x0x1556x1167x1556.png?h=4e68c58c041b453ec9c9b1e8c0c3b5a4",
-    "_file": "multiphonic-20251003-112006.json"
-  },
-  {
-    "projectName": "Rapper Sjors",
-    "creators": [
-      "Sjors Peeters"
-    ],
-    "description": "Ben rapper yeah",
-    "category": "Human",
-    "year": 2025,
-    "studielast": "https://videoboodschapbestellen.nl/wp-content/uploads/2019/03/sjors-1.jpg",
-    "_file": "rapper-sjors-20250929-133706.json"
-  },
-  {
-    "projectName": "Soep",
-    "creators": [
-      "Soep"
-    ],
-    "description": "Soep",
-    "category": "Void",
-    "year": 2025,
-    "studielast": "www.soep.nl",
-    "_file": "soep-20250930-143426.json"
-  },
-  {
-    "projectName": "Wobble",
-    "creators": [
-      "Wobble"
-    ],
-    "description": "Wobble",
-    "category": "Void",
-    "year": 2025,
-    "studielast": "4weken",
-    "_file": "wobble-20250929-133536.json"
+    "studielast": "https://cdn.myportfolio.com/3b2c54e9-8c5d-410c-9a71-38340d238cb5/97554321-ba29-42c1-b60c-54f51e914b55_rw_600.png?h=a8a489505219af22080456895308521d",
+    "_file": "doordeweeks-20251003-120005.json"
   }
 ]
